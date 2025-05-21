@@ -28,7 +28,7 @@ const store = new MongoDBStore({
 // Middleware for session management
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://mcabycocas.onrender.com/",
     credentials: true,
   })
 );
