@@ -1,8 +1,19 @@
 const Faculty = require("../models/facultyModel");
+const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+dotenv.config();
 const bcrypt = require("bcryptjs");
-// @desc    Register a new faculty
-// @route   POST /auth/faculty-signup
-// @access  Public
+
+
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER, // Your email address
+    pass: process.env.EMAIL_PASS, // Your email password or app password
+  },
+});
+
 exports.facultySignup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -98,3 +109,76 @@ exports.facultyLogout = async (req, res) => {
   }
 };
 
+exports.facultyForgetPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const faculty = await Faculty.findOne({ email });
+    if (!faculty) {
+      return res.status(400).json({ message: "Email not found" });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    faculty.otp = otp.toString();
+    await faculty.save();
+
+    const mailOptions = {
+      from: `MCA BY COCAS ${process.env.EMAIL_USER}`,
+      to: email,
+      subject: "Reset Password OTP",
+      html: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        return res
+          .status(500)
+          .json({ error: "Failed to Send Reset Password OTP" });
+      } else {
+        console.log("Email sent:", info.response);
+      }
+    });
+    res.status(200).json({message:"OTP sent to your email"});
+  } catch (error) {
+    res.status(500).json({message:"Server error. Please try again later."});
+    console.error("Error in facultyForgetPassword:", error);
+  }
+};
+
+exports.facultyVerifyOtp = async (req,res)=>{
+  const { email } = req.params;
+  const { otp } = req.body;
+  try {
+    const faculty = await Faculty.findOne({email});
+    if(!faculty){
+      res.status(400).json({message:"Email not found"});
+    }
+    if(faculty.otp !== otp){
+      res.status(400).json({message:"Invalid OTP"});
+    }
+    faculty.otp = null;
+    await faculty.save();
+    res.status(200).json({message:"OTP verified successfully"});
+  } catch (error) {
+    res.status(500).json({message:"Server error. Please try again later."});
+    console.error("Error in facultyVerifyOtp:", error);
+  }
+    
+}
+
+exports.facultyResetPassword= async(req,res)=>{
+  const { email } = req.params;
+  const { password } = req.body;
+  try {
+    const faculty =await Facutly.findOne({email});
+    if(!faculty){
+      res.status(400).json({message:"Email not found"});
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
+    faculty.password = hashedPassword;
+    await faculty.save();
+    res.status(200).json({message:"Password reset successfully"});
+  } catch (error) {
+    res.status(500).json({message:"Server error. Please try again later."});
+    console.error("Error in facultyResetPassword:",error);
+  } 
+}

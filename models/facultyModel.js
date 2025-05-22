@@ -13,7 +13,8 @@ const facultySchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+    otp:{type:String}
 });
 
 const Faculty = mongoose.model('Faculty', facultySchema);
