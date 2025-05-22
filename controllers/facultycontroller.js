@@ -127,16 +127,7 @@ exports.facultyForgetPassword = async (req, res) => {
       html: `<p>Your OTP for password reset is: <strong>${otp}</strong></p>`,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        return res
-          .status(500)
-          .json({ error: "Failed to Send Reset Password OTP" });
-      } else {
-        console.log("Email sent:", info.response);
-      }
-    });
+    transporter.sendMail(mailOptions);
     res.status(200).json({message:"OTP sent to your email"});
   } catch (error) {
     res.status(500).json({message:"Server error. Please try again later."});
