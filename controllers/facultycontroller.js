@@ -135,41 +135,53 @@ exports.facultyForgetPassword = async (req, res) => {
   }
 };
 
-exports.facultyVerifyOtp = async (req,res)=>{
+exports.facultyVerifyOtp = async (req, res) => {
   const email = req.params.email;
   const { otp } = req.body;
+
   try {
-    const faculty = await Faculty.findOne({email});
-    if(!faculty){
-      res.status(400).json({message:"Email not found"});
+    const faculty = await Faculty.findOne({ email });
+
+    if (!faculty) {
+      return res.status(400).json({ message: "Email not found" });
     }
-    if(faculty.otp !== otp){
-      res.status(400).json({message:"Invalid OTP"});
+
+    if (faculty.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
+
+    // Clear OTP after successful verification
     faculty.otp = null;
     await faculty.save();
-    res.status(200).json({message:"OTP verified successfully"});
-  } catch (error) {
-    res.status(500).json({message:"Server error. Please try again later."});
-    console.error("Error in facultyVerifyOtp:", error);
-  }
-    
-}
 
-exports.facultyResetPassword= async(req,res)=>{
+    res.status(200).json({ message: "OTP verified successfully" });
+
+  } catch (error) {
+    console.error("Error in facultyVerifyOtp:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+exports.facultyResetPassword = async (req, res) => {
   const email = req.params.email;
   const { password } = req.body;
+
   try {
-    const faculty =await Facutly.findOne({email});
-    if(!faculty){
-      res.status(400).json({message:"Email not found"});
+    const faculty = await Faculty.findOne({ email });
+
+    if (!faculty) {
+      return res.status(400).json({ message: "Email not found" });
     }
+
     const hashedPassword = await bcrypt.hash(password, 12);
     faculty.password = hashedPassword;
+
     await faculty.save();
-    res.status(200).json({message:"Password reset successfully"});
+
+    res.status(200).json({ message: "Password reset successfully" });
+
   } catch (error) {
-    res.status(500).json({message:"Server error. Please try again later."});
-    console.error("Error in facultyResetPassword:",error);
-  } 
-}
+    console.error("Error in facultyResetPassword:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};

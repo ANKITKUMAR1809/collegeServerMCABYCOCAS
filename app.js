@@ -12,33 +12,37 @@ dotenv.config();
 // App init
 const app = express();
 
-// CORS Middleware (must come first!)
+// ✅ CORS Middleware - allow frontend origin and credentials
 app.use(cors({
-  origin: "https://mcabycocas.onrender.com", // your frontend origin
-  credentials: true, // allow cookies/session
+  origin: "https://mcabycocas.onrender.com",  // Replace with your frontend domain
+  credentials: true,
 }));
 
-// Body parsing
+// ✅ Body parsing
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// MongoDB session store
+// ✅ MongoDB session store
 const store = new MongoDBStore({
   uri: process.env.MONGODB_URI,
   collection: "sessions",
 });
 
-// Express session
+// ✅ Express session with cookie config for cross-origin
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    store: store, 
+    store: store,
+    cookie: {
+      sameSite: "none", // Required for cross-origin cookies
+      secure: true,     // Required for HTTPS (Render uses HTTPS)
+    },
   })
 );
 
-// Routes
+// ✅ Routes
 const studentRouter = require("./routers/studentRoute");
 const facultyRouter = require("./routers/facultyRouter");
 const notificationRouter = require("./routers/notificationRouter");
@@ -48,12 +52,12 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-// Use routers
+// ✅ Mount routers
 app.use(studentRouter);
 app.use("/auth", facultyRouter);
 app.use(notificationRouter);
 
-// Connect to MongoDB and start server
+// ✅ Connect to MongoDB and start server
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     const port = process.env.PORT || 4000;
