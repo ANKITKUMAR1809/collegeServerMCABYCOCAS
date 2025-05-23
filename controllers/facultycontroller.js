@@ -154,7 +154,7 @@ exports.facultyVerifyOtp = async (req, res) => {
     faculty.otp = null;
     await faculty.save();
 
-    res.status(200).json({ message: "OTP verified successfully" });
+    return res.status(200).json({ message: "OTP verified successfully" });
 
   } catch (error) {
     console.error("Error in facultyVerifyOtp:", error);
@@ -178,10 +178,10 @@ exports.facultyResetPassword = async (req, res) => {
 
     await faculty.save();
 
-    res.status(200).json({ message: "Password reset successfully" });
+    return res.status(200).json({ message: "Password reset successfully" });
 
   } catch (error) {
     console.error("Error in facultyResetPassword:", error);
-    res.status(500).json({ message: "Server error. Please try again later." });
+    return res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
