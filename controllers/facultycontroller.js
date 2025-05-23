@@ -136,7 +136,7 @@ exports.facultyForgetPassword = async (req, res) => {
 };
 
 exports.facultyVerifyOtp = async (req,res)=>{
-  const { email } = req.params;
+  const email = req.params.email;
   const { otp } = req.body;
   try {
     const faculty = await Faculty.findOne({email});
@@ -157,7 +157,7 @@ exports.facultyVerifyOtp = async (req,res)=>{
 }
 
 exports.facultyResetPassword= async(req,res)=>{
-  const { email } = req.params;
+  const email = req.params.email;
   const { password } = req.body;
   try {
     const faculty =await Facutly.findOne({email});

@@ -6,17 +6,19 @@ const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 
-
-// Load environment variables from .env file
+// Load env variables
 dotenv.config();
 
-// Importing the express module
+// App init
 const app = express();
 
-// Importing routes
-const studentRouter = require("./routers/studentRoute");
-const facultyRouter = require("./routers/facultyRouter");
-const notificationRouter = require('./routers/notificationRouter');
+// CORS Middleware (must come first!)
+app.use(cors({
+  origin: "https://mcabycocas.onrender.com", // your frontend origin
+  credentials: true, // allow cookies/session
+}));
+
+// Body parsing
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -25,14 +27,8 @@ const store = new MongoDBStore({
   uri: process.env.MONGODB_URI,
   collection: "sessions",
 });
-// Middleware for session management
-app.use(
-  cors({
-    origin: "https://mcabycocas.onrender.com",
-    credentials: true,
-  })
-);
 
+// Express session
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -42,26 +38,30 @@ app.use(
   })
 );
 
+// Routes
+const studentRouter = require("./routers/studentRoute");
+const facultyRouter = require("./routers/facultyRouter");
+const notificationRouter = require("./routers/notificationRouter");
+
+// Root route
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+// Use routers
 app.use(studentRouter);
-
 app.use("/auth", facultyRouter);
-
 app.use(notificationRouter);
 
-
-mongoose
-  .connect(process.env.MONGODB_URI)
+// Connect to MongoDB and start server
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
-    app.listen(process.env.PORT ||4000, () => {
+    const port = process.env.PORT || 4000;
+    app.listen(port, () => {
       console.log("Connected to MongoDB");
-      console.log("Server is running on port " + process.env.PORT);
-      console.log("http://localhost:" + (process.env.PORT || 4000));
+      console.log("Server running on port " + port);
     });
   })
   .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
+    console.error("MongoDB connection error:", err);
   });
