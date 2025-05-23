@@ -136,7 +136,8 @@ exports.facultyForgetPassword = async (req, res) => {
 };
 
 exports.facultyVerifyOtp = async (req, res) => {
-  const email = req.params.email;
+  const {email} = req.params;
+  console.log(email);
   const { otp } = req.body;
 
   try {
