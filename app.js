@@ -46,6 +46,7 @@ app.use(
 const studentRouter = require("./routers/studentRoute");
 const facultyRouter = require("./routers/facultyRouter");
 const notificationRouter = require("./routers/notificationRouter");
+const chatBotRouter =require("./routers/chatbotRouter");
 
 // Root route
 app.get("/", (req, res) => {
@@ -56,6 +57,7 @@ app.get("/", (req, res) => {
 app.use(studentRouter);
 app.use("/auth", facultyRouter);
 app.use(notificationRouter);
+app.use("/chat", chatBotRouter);
 
 // ✅ Connect to MongoDB and start server
 mongoose.connect(process.env.MONGODB_URI)
