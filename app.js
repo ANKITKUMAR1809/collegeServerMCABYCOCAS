@@ -5,22 +5,21 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
-const cookieParser = require("cookie-parser");
 
 // Load env variables
 dotenv.config();
 
 // App init
 const app = express();
-app.use(cookieParser());
+
+// ✅ IMPORTANT: Trust proxy for secure cookies (Render HTTPS)
+app.set("trust proxy", 1);
 
 // ✅ CORS Middleware - allow frontend origin and credentials
-app.use(
-  cors({
-    origin: "https://mcabycocas.onrender.com", // Replace with your frontend domain
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: "https://mcabycocas.onrender.com", // your frontend domain
+  credentials: true,
+}));
 
 // ✅ Body parsing
 app.use(express.json());
@@ -32,46 +31,44 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 
-// ✅ Express session with cookie config for cross-origin
-app.set("trust proxy", 1);
+// ✅ Express session setup with secure cookie config
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: store,
+  cookie: {
+    httpOnly: true,
+    secure: true,         // ✅ Required for HTTPS (Render uses HTTPS)
+    sameSite: "none",     // ✅ Required for cross-site cookies
+    maxAge: 1000 * 60 * 60, // 1 hour
+  },
+}));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-    cookie: {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none", // this is required for cross-site cookies
-      maxAge: 1000 * 60 * 60,
-    },
-  })
-);
+// ✅ TEMP TEST: Session checker route (for debugging)
+app.get("/auth/session-check", (req, res) => {
+  if (req.session.user) {
+    res.json({ loggedIn: true, user: req.session.user });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
 
-// ✅ Routes
+// ✅ Mount your routers
 const studentRouter = require("./routers/studentRoute");
 const facultyRouter = require("./routers/facultyRouter");
 const notificationRouter = require("./routers/notificationRouter");
 
-// Root route
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Hello World from Backend");
 });
 
-app.use((req, res, next) => {
-  console.log("Session data:", req.session);
-  next();
-});
-// ✅ Mount routers
 app.use(studentRouter);
 app.use("/auth", facultyRouter);
 app.use(notificationRouter);
 
-// ✅ Connect to MongoDB and start server
-mongoose
-  .connect(process.env.MONGODB_URI)
+// ✅ MongoDB connection and server start
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     const port = process.env.PORT || 4000;
     app.listen(port, () => {
