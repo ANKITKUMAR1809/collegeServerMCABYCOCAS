@@ -4,6 +4,10 @@ const Faculty = require("../models/facultyModel");
 exports.createNotification = async (req, res) => {
   try {
     const id = req.session.user.id;
+    if(!id) {
+      console.log("No user ID found in session");
+      return res.status(401).json({ message: "Please login as Faculty" });
+    }
     const faculty = await Faculty.findById(id);
 
     if (!faculty) {
