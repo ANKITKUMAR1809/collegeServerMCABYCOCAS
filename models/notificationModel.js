@@ -6,10 +6,6 @@ const notificationSchema = new mongoose.Schema({
   image: {
     type: String,
     required: true,
-    validate: {
-      validator: url => /\.(jpg|jpeg|png|gif|webp)$/i.test(url),
-      message: "Only valid image URLs are allowed",
-    },
   },
 }, { timestamps: true });
 

@@ -37,6 +37,7 @@ exports.createNotification = async (req, res) => {
       message: "Notification with image created successfully",
     });
   } catch (error) {
+    console.error("Error creating notification:", error);
     res.status(500).json({
       success: false,
       message: "Image upload failed",

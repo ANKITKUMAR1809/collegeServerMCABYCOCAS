@@ -31,6 +31,8 @@ const store = new MongoDBStore({
 });
 
 // ✅ Express session with cookie config for cross-origin
+app.set("trust proxy", 1);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -39,9 +41,9 @@ app.use(
     store: store,
     cookie: {
       httpOnly: true,
-      secure: true, // important for HTTPS (Render uses HTTPS)
-      sameSite: "none", // must be 'none' for cross-site cookies
-      maxAge: 1000 * 60 * 60, // 1 hour
+      secure: true,
+      sameSite: "none", // this is required for cross-site cookies
+      maxAge: 1000 * 60 * 60,
     },
   })
 );
