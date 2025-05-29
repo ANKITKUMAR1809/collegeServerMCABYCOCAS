@@ -5,12 +5,14 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+const cookieParser = require("cookie-parser");
 
 // Load env variables
 dotenv.config();
 
 // App init
 const app = express();
+app.use(cookieParser());
 
 // ✅ CORS Middleware - allow frontend origin and credentials
 app.use(
@@ -58,6 +60,10 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+app.use((req, res, next) => {
+  console.log("Session data:", req.session);
+  next();
+});
 // ✅ Mount routers
 app.use(studentRouter);
 app.use("/auth", facultyRouter);
