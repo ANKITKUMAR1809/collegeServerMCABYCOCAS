@@ -35,10 +35,6 @@ app.use(
     resave: false,
     saveUninitialized: true,
     store: store,
-    cookie: {
-      sameSite: "none", // Required for cross-origin cookies
-      secure: true,     // Required for HTTPS (Render uses HTTPS)
-    },
   })
 );
 
