@@ -13,10 +13,12 @@ dotenv.config();
 const app = express();
 
 // ✅ CORS Middleware - allow frontend origin and credentials
-app.use(cors({
-  origin: "https://mcabycocas.onrender.com",  // Replace with your frontend domain
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "https://mcabycocas.onrender.com", // Replace with your frontend domain
+    credentials: true,
+  })
+);
 
 // ✅ Body parsing
 app.use(express.json());
@@ -35,6 +37,12 @@ app.use(
     resave: false,
     saveUninitialized: true,
     store: store,
+    cookie: {
+      httpOnly: true,
+      secure: true, // important for HTTPS (Render uses HTTPS)
+      sameSite: "none", // must be 'none' for cross-site cookies
+      maxAge: 1000 * 60 * 60, // 1 hour
+    },
   })
 );
 
@@ -54,7 +62,8 @@ app.use("/auth", facultyRouter);
 app.use(notificationRouter);
 
 // ✅ Connect to MongoDB and start server
-mongoose.connect(process.env.MONGODB_URI)
+mongoose
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     const port = process.env.PORT || 4000;
     app.listen(port, () => {
