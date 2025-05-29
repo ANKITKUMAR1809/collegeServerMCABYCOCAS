@@ -4,8 +4,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 const bcrypt = require("bcryptjs");
 
-
-
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -63,7 +61,13 @@ exports.facultyLogin = async (req, res) => {
       email: faculty.email,
     };
     req.session.isLoggedIn = true;
-    await req.session.save();
+    req.session.save((err) => {
+      if (err) {
+        console.log("Session save error:", err);
+      } else {
+        console.log("Session saved");
+      }
+    });
     // Send response
     res.status(200).json({
       message: "Login successful",
@@ -128,15 +132,15 @@ exports.facultyForgetPassword = async (req, res) => {
     };
 
     transporter.sendMail(mailOptions);
-    res.status(200).json({message:"OTP sent to your email"});
+    res.status(200).json({ message: "OTP sent to your email" });
   } catch (error) {
-    res.status(500).json({message:"Server error. Please try again later."});
+    res.status(500).json({ message: "Server error. Please try again later." });
     console.error("Error in facultyForgetPassword:", error);
   }
 };
 
 exports.facultyVerifyOtp = async (req, res) => {
-  const {email} = req.params;
+  const { email } = req.params;
   console.log(email);
   const { otp } = req.body;
 
@@ -156,7 +160,6 @@ exports.facultyVerifyOtp = async (req, res) => {
     await faculty.save();
 
     return res.status(200).json({ message: "OTP verified successfully" });
-
   } catch (error) {
     console.error("Error in facultyVerifyOtp:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
@@ -180,9 +183,10 @@ exports.facultyResetPassword = async (req, res) => {
     await faculty.save();
 
     return res.status(200).json({ message: "Password reset successfully" });
-
   } catch (error) {
     console.error("Error in facultyResetPassword:", error);
-    return res.status(500).json({ message: "Server error. Please try again later." });
+    return res
+      .status(500)
+      .json({ message: "Server error. Please try again later." });
   }
 };
