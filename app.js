@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const session = require("express-session");
-const MongoDBStore = require("connect-mongodb-session")(session);
 
 // Load env variables
 dotenv.config();
@@ -14,7 +12,7 @@ const app = express();
 
 // ✅ CORS Middleware - allow frontend origin and credentials
 app.use(cors({
-  origin: "https://mcabycocas.onrender.com",  // Replace with your frontend domain
+  origin: "https://mcabycocas.onrender.com" && "http://localhost:5173",  // Replace with your frontend domain
   credentials: true,
 }));
 
@@ -23,24 +21,10 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // ✅ MongoDB session store
-const store = new MongoDBStore({
-  uri: process.env.MONGODB_URI,
-  collection: "sessions",
-});
+
 
 // ✅ Express session with cookie config for cross-origin
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    store: store,
-    cookie: {
-      sameSite: "none", // Required for cross-origin cookies
-      secure: true,     // Required for HTTPS (Render uses HTTPS)
-    },
-  })
-);
+
 
 // ✅ Routes
 const studentRouter = require("./routers/studentRoute");
