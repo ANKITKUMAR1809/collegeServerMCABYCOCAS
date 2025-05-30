@@ -12,7 +12,7 @@ const app = express();
 
 // ✅ CORS Middleware - allow frontend origin and credentials
 app.use(cors({
-  origin: "https://mcabycocas.onrender.com" && "http://localhost:5173",  // Replace with your frontend domain
+  origin: "https://mcabycocas.onrender.com",  // Replace with your frontend domain
   credentials: true,
 }));
 
