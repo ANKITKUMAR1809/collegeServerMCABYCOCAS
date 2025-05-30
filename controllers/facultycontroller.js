@@ -56,21 +56,7 @@ exports.facultyLogin = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-    //use session to store user data
-    req.session.user = {
-      id: faculty._id,
-      name: faculty.name,
-      email: faculty.email,
-    };
-    req.session.isLoggedIn = true;
-    req.session.save((err) => {
-      if (err) {
-        console.log("Session save error:", err);
-      } else {
-        console.log("Session saved");
-      }
-    });
-    // Send response
+  
     // Generate JWT token
     const token = jwt.sign(
       { id: faculty._id, email: faculty.email },
