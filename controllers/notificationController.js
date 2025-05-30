@@ -3,6 +3,7 @@ const Faculty = require("../models/facultyModel");
 
 exports.createNotification = async (req, res) => {
   try {
+    console.log(req.session.user)
     const id = req.session.user.id;
     if(!id) {
       console.log("No user ID found in session");

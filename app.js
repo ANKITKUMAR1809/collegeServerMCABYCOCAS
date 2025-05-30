@@ -9,11 +9,8 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 // Load env variables
 dotenv.config();
 
-// App init
 const app = express();
 
-// ✅ IMPORTANT: Trust proxy for secure cookies (Render HTTPS)
-app.set("trust proxy", 1);
 
 // ✅ CORS Middleware - allow frontend origin and credentials
 app.use(cors({
@@ -38,21 +35,12 @@ app.use(session({
   saveUninitialized: false,
   store: store,
   cookie: {
-    httpOnly: true,
-    secure: true,         // ✅ Required for HTTPS (Render uses HTTPS)
-    sameSite: "none",     // ✅ Required for cross-site cookies
-    maxAge: 1000 * 60 * 60, // 1 hour
+    httpOnly: true, 
+    secure: true,    
+    sameSite: "none", // Required for cross-origin cookies
   },
 }));
 
-// ✅ TEMP TEST: Session checker route (for debugging)
-app.get("/auth/session-check", (req, res) => {
-  if (req.session.user) {
-    res.json({ loggedIn: true, user: req.session.user });
-  } else {
-    res.json({ loggedIn: false });
-  }
-});
 
 // ✅ Mount your routers
 const studentRouter = require("./routers/studentRoute");
