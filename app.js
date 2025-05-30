@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const session = require("express-session");
-const MongoDBStore = require("connect-mongodb-session")(session);
 
 // Load env variables
 dotenv.config();
@@ -14,7 +12,7 @@ const app = express();
 
 // ✅ CORS Middleware - allow frontend origin and credentials
 app.use(cors({
-  origin: "https://mcabycocas.onrender.com", // your frontend domain
+  origin: "https://mcabycocas.onrender.com" && "http://localhost:5173",  // Replace with your frontend domain
   credentials: true,
 }));
 
@@ -23,29 +21,16 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // ✅ MongoDB session store
-const store = new MongoDBStore({
-  uri: process.env.MONGODB_URI,
-  collection: "sessions",
-});
 
-// ✅ Express session setup with secure cookie config
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: store,
-  cookie: {
-    httpOnly: true, 
-    secure: true,    
-    sameSite: "none", // Required for cross-origin cookies
-  },
-}));
+
+// ✅ Express session with cookie config for cross-origin
 
 
 // ✅ Mount your routers
 const studentRouter = require("./routers/studentRoute");
 const facultyRouter = require("./routers/facultyRouter");
 const notificationRouter = require("./routers/notificationRouter");
+const chatBotRouter =require("./routers/chatbotRouter");
 
 app.get("/", (req, res) => {
   res.send("Hello World from Backend");
@@ -54,6 +39,7 @@ app.get("/", (req, res) => {
 app.use(studentRouter);
 app.use("/auth", facultyRouter);
 app.use(notificationRouter);
+app.use("/chat", chatBotRouter);
 
 // ✅ MongoDB connection and server start
 mongoose.connect(process.env.MONGODB_URI)

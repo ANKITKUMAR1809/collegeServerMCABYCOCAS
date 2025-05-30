@@ -3,6 +3,8 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 dotenv.config();
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -69,6 +71,12 @@ exports.facultyLogin = async (req, res) => {
       }
     });
     // Send response
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: faculty._id, email: faculty.email },
+      process.env.JWT_SECRET
+    );
+
     res.status(200).json({
       message: "Login successful",
       user: {
@@ -76,42 +84,32 @@ exports.facultyLogin = async (req, res) => {
         name: faculty.name,
         email: faculty.email,
       },
+      token: token,
     });
   } catch (error) {
     console.error("Faculty Login Error:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
-
-exports.facultySession = async (req, res) => {
-  try {
-    if (req.session.user && req.session.isLoggedIn) {
-      res.status(200).json({ user: req.session.user });
-    } else {
-      res.status(401).json({ message: "No active session" });
-    }
-  } catch (error) {
-    console.error("Faculty Session Error:", error);
-    res.status(500).json({ message: "Server error. Please try again later." });
+exports.jwtAuth = async(req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized access" });
   }
-};
-
-exports.facultyLogout = async (req, res) => {
-  try {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Logout Error:", err);
-        return res
-          .status(500)
-          .json({ message: "Server error. Please try again later." });
-      }
-      res.status(200).json({ message: "Logout successful" });
-    });
-  } catch (error) {
-    console.error("Faculty Logout Error:", error);
-    res.status(500).json({ message: "Server error. Please try again later." });
+  const decode = jwt.verify(token, process.env.JWT_SECRET);
+  if (!decode) {
+    return res.status(401).json({ message: "Invalid token" });
   }
-};
+  return res.status(200).json({
+    message: "Token is valid",
+    user: {
+      id: decode.id,
+      email: decode.email,
+    },
+  });
+}
+
+
 
 exports.facultyForgetPassword = async (req, res) => {
   const { email } = req.body;

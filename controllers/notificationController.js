@@ -1,13 +1,17 @@
 const Notification = require("../models/notificationModel");
 const Faculty = require("../models/facultyModel");
+const jwt = require("jsonwebtoken");
 
 exports.createNotification = async (req, res) => {
   try {
-    console.log(req.session.user)
-    const id = req.session.user.id;
-    if(!id) {
-      console.log("No user ID found in session");
-      return res.status(401).json({ message: "Please login as Faculty" });
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const id = decoded.id;
+    if (!id) {
+      return res.status(401).json({ message: "Invalid token" });
     }
     const faculty = await Faculty.findById(id);
 
@@ -38,7 +42,7 @@ exports.createNotification = async (req, res) => {
       message: "Notification with image created successfully",
     });
   } catch (error) {
-    console.error("Error creating notification:", error);
+    console.log(error);
     res.status(500).json({
       success: false,
       message: "Image upload failed",
